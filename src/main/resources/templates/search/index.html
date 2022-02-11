@@ -22,16 +22,7 @@
 			}
 		}, 250));
 		
-		let bookmarks = getBookmarks();
-		if (bookmarks.length > 0) {
-			//let bookmarkTemplate = _.template('<div class="bookmarkItem">')
-			$(".bookmarks").show();
-			for (let i = 0 ; i < bookmarks.length ; i++) {
-				
-			}
-		} else {
-			$(".bookmarks").hide();
-		}
+		renderReadingList();
 	});
 
 	function searchNews(pageNo) {
@@ -53,19 +44,41 @@
 		}
 	}
 	
-	  /**
-	   * Get available bookmarks
-	   */
-	  function getBookmarks() {
-			let bookmarks = localStorage.getItem('bookmarks');
-			if (bookmarks) {
-				bookmarks = JSON.parse(bookmarks);			
-			} else {
-				bookmarks = [];
-			}
+	/**
+	 * Get available bookmarks
+	 */
+	function getBookmarks() {
+		let bookmarks = localStorage.getItem('bookmarks');
+		if (bookmarks) {
+			bookmarks = JSON.parse(bookmarks);			
+		} else {
+			bookmarks = [];
+		}
 			
-			return bookmarks;
-	  }
+		return bookmarks;
+	}
+	
+	/**
+	 * Render bookmarked articles into a reading list
+	 */
+	function renderReadingList() {
+		let bookmarks = getBookmarks();
+		if (bookmarks.length > 0) {
+			let bookmarkTemplate = _.template('<div class="bookmarkItem"><a href=<%=url%> target="_blank"><%=title%></a></div>')
+			$(".bookmarks").show();
+
+			let $bookmarkEl = $(".bookmarkItems"); 
+
+			// clear the div and repopulate
+			$bookmarkEl.empty();
+			for (let i = 0 ; i < bookmarks.length ; i++) {
+				let bookmarkHtml = bookmarkTemplate(bookmarks[i]);
+				$bookmarkEl.append($(bookmarkHtml));
+			}
+		} else {
+			$(".bookmarks").hide();
+		}
+	}
 	
   </script>
   
@@ -84,6 +97,7 @@
     
 	<div class="bookmarks">
 		<h2>Reading List</h2>
+		<div class="bookmarkItems"></div>
 	</div>
     
   </div>
