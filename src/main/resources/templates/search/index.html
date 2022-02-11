@@ -2,6 +2,73 @@
 <html data-th-replace="~{layout :: layout(~{::head/content()}, 'search', ~{::div})}">
 <head>
   <title>Search</title>
+  
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+   
+  <link rel="stylesheet" href="css/common.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.21/lodash.min.js" crossorigin="anonymous"></script>
+  
+  <script>
+	// On ready
+	$(function() {
+		window.previousSearchTerm = null;
+		$("#searchBox").on("keyup", _.debounce(function() {
+			let searchTerm = $("#searchBox").val();
+			if (previousSearchTerm == null || searchTerm !== previousSearchTerm) {
+				searchNews(1);
+			}
+		}, 250));
+		
+		let bookmarks = getBookmarks();
+		if (bookmarks.length > 0) {
+			//let bookmarkTemplate = _.template('<div class="bookmarkItem">')
+			$(".bookmarks").show();
+			for (let i = 0 ; i < bookmarks.length ; i++) {
+				
+			}
+		} else {
+			$(".bookmarks").hide();
+		}
+	});
+
+	function searchNews(pageNo) {
+		let searchTerm = $("#searchBox").val();
+		if (previousSearchTerm == null || searchTerm !== previousSearchTerm || pageNo != null) {
+			$.ajax({
+				url: "search/query",
+				data: {
+					searchTerm: $("#searchBox").val(),
+					pageNo: pageNo
+				},
+				
+				success: function(data) {
+					previousSearchTerm = searchTerm;
+					$('#searchResults').empty().html(data);
+				}
+			
+			});
+		}
+	}
+	
+	  /**
+	   * Get available bookmarks
+	   */
+	  function getBookmarks() {
+			let bookmarks = localStorage.getItem('bookmarks');
+			if (bookmarks) {
+				bookmarks = JSON.parse(bookmarks);			
+			} else {
+				bookmarks = [];
+			}
+			
+			return bookmarks;
+	  }
+	
+  </script>
+  
 </head>
 
 <body>
@@ -9,8 +76,16 @@
   <div class='container'>
     <div class='content'>
       <h2>Search</h2>
-      <p>Start building the functionality for your application!</p>
+      <p>What would you like to read about? </p>
+	  <input type="text" class="searchBox" id="searchBox">
+
+	  <div id="searchResults"></div>
     </div>
+    
+	<div class="bookmarks">
+		<h2>Reading List</h2>
+	</div>
+    
   </div>
 </div>
 </body>

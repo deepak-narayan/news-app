@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en" class="h-100">
+<script>
+  /**
+   * Open an article
+   */
+  function openArticle(element, event) {
+	  window.open(element.getAttribute("data-url"));
+  }
+  
+  /**
+   * Toggle bookmarks
+   */
+  function toggleBookmarkArticle(element, event) {
+	  event.stopPropagation();
+	  let id = element.id;
+	  let bookmarks = getBookmarks();
+	  let count = bookmarks.length;
+	  bookmarks = _.remove(bookmarks, o => o.id !== id);
+	  if (count === bookmarks.length) {
+		  // Was not bookmarked, add it in
+		  bookmarks.push({
+			  id: id,
+			  title: element.getAttribute("data-title"),
+			  url: element.getAttribute("data-url")
+		  });
+	  }
+	  
+	  saveBookmarks(bookmarks);
+  }
+  
+  function saveBookmarks(bookmarks) {
+	  localStorage.setItem('bookmarks', JSON.stringify(bookmarks));
+  }
+  
+  $(function() {
+	  let bookmarkIds = getBookmarks().map(o => o.id);
+	  let newsItemElements = $(".newsArticle")
+	  if (newsItemElements) {
+		  for (let i = 0 ; i < newsItemElements.length ; i++) {
+			  if (_.findIndex(bookmarkIds, id => newsItemElements[i].id === id) >= 0) {
+				  $(newsItemElements[i]).find(".bookmark").prop("checked", true);
+			  }			  
+		  }
+	  }
+  });
+  
+</script>
+	<div th:each="article: ${articleList}">
+		<div th:attr="data-url=${article.url}, data-title=${article.title}" 
+		     th:onclick="openArticle(this, event)"
+		     th:id="${article.id}" 
+		     class="newsArticle">
+		     
+			<div th:text="${article.title}" class="newsArticleTitle"></div>
+			Published <span th:text="${article.publicationDate}" class="newsArticleDate"></span> <br>
+			Read Later &nbsp; <input type="checkbox" th:onclick="toggleBookmarkArticle(this.parentElement, event)" class="bookmark">
+		</div>	    
+	</div>
+	
+	<div class="pagination container">
+		<button class="previousPage" 
+		        th:disabled="${apiResponse.currentPage == 1}" 
+		        th:onclick="'searchNews(' + ${apiResponse.currentPage - 1} + ')'">
+		        Previous
+		</button>
+		
+		<button class="nextPage" 
+		        th:disabled="${apiResponse.currentPage == apiResponse.pages}" 
+		        th:onclick="'searchNews(' + ${apiResponse.currentPage + 1} + ')'">
+		        Next
+		</button>
+	</div>
+</html>
